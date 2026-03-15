@@ -49,7 +49,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">⚠️</span>
-          You are currently below target. To reach <span className="font-bold">{displayTarget}%</span>, you must attend <span className="font-bold">{mustAttend}</span> more classes. (You can only bunk <span className="font-bold">{bunkable}</span>).
+          You are currently below target. To reach <span className="font-bold">{displayTarget}%</span>, you must attend <span className="font-bold">{mustAttend}</span> more classes.
         </p>
       </div>
     );
@@ -58,7 +58,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
       <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4 text-emerald-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">✅</span>
-          You are safe! Even with your planned bunks, you can skip <span className="font-bold">{actualBunkable}</span> more classes and stay above <span className="font-bold">{displayTarget}%</span>.
+          You are safe! You have a sufficient buffer to stay above <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
