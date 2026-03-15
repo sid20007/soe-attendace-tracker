@@ -75,6 +75,21 @@ export async function POST(request) {
       );
     }
 
+    // 2.5: EXTRACT STUDENT NAME
+    let studentName = "Student";
+    try {
+      const htmlResponse = await client.get('https://btechconnect.staloysius.edu.in/attendance', {
+        headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
+      });
+      const htmlString = htmlResponse.data;
+      const nameMatch = htmlString.match(/Welcome\s+([^<]+)/i) || htmlString.match(/>([^<]+)<\/.*?>\s*Reg No/i) || htmlString.match(/user-name[^>]*>([^<]+)/i);
+      if (nameMatch && nameMatch[1]) {
+        studentName = nameMatch[1].trim();
+      }
+    } catch (nameError) {
+      console.error("Failed to extract student name:", nameError.message);
+    }
+
     // 3. FETCH DATA: Use exact cookies to GET the JSON API endpoint
     const fetchUrl = `https://btechconnect.staloysius.edu.in/attendance/fetch?semester=${semester}`;
     const fetchResponse = await client.get(fetchUrl, {
@@ -111,15 +126,21 @@ export async function POST(request) {
     // Fallback Mock for Testing Local UI Development (if real arrays are empty while testing)
     if (cleanData.length === 0) {
       console.log('No data returned from array, falling back to mock JSON for testing.');
-      return NextResponse.json([
-        { id: "MAT101", name: `Engineering Mathematics (Sem ${semester})`, code: "MAT101", attended: 24, total: 30 },
-        { id: "ELE102", name: `Basic Electronics (Sem ${semester})`, code: "ELE102", attended: 18, total: 25 },
-        { id: "CS103", name: `Python Programming (Sem ${semester})`, code: "CS103", attended: 35, total: 40 }
-      ], { status: 200 });
+      return NextResponse.json({
+        studentName: "Mock Student",
+        subjects: [
+          { id: "MAT101", name: `Engineering Mathematics (Sem ${semester})`, code: "MAT101", attended: 24, total: 30 },
+          { id: "ELE102", name: `Basic Electronics (Sem ${semester})`, code: "ELE102", attended: 18, total: 25 },
+          { id: "CS103", name: `Python Programming (Sem ${semester})`, code: "CS103", attended: 35, total: 40 }
+        ]
+      }, { status: 200 });
     }
 
-    // Return the cleaned data
-    return NextResponse.json(cleanData, { status: 200, headers: { 'Cache-Control': 'no-store' } });
+    // Return the cleaned data WITH the name
+    return NextResponse.json(
+      { studentName: studentName, subjects: cleanData }, 
+      { status: 200, headers: { 'Cache-Control': 'no-store' } }
+    );
 
   } catch (error) {
     console.error('Attendance Fetch Error:', error);

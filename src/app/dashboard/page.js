@@ -80,8 +80,9 @@ function SubjectCard({ subject, target, upcoming }) {
 export default function DashboardPage() {
   const router = useRouter();
   const [subjects, setSubjects] = useState([]);
+  const [studentName, setStudentName] = useState("Student");
   const [target, setTarget] = useState(0.80);
-  const [upcoming, setUpcoming] = useState(25);
+  const [upcoming, setUpcoming] = useState(25); // Value kept constant for math logic, mapped out of UI
   const [loading, setLoading] = useState(true);
 
   // Load state from local storage
@@ -90,7 +91,11 @@ export default function DashboardPage() {
     if (dataStr) {
       try {
         const parsed = JSON.parse(dataStr);
-        if (Array.isArray(parsed) && parsed.length > 0) {
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.subjects) {
+          setSubjects(parsed.subjects);
+          if (parsed.studentName) setStudentName(parsed.studentName);
+        } else if (Array.isArray(parsed) && parsed.length > 0) {
+          // Fallback for old cached data format
           setSubjects(parsed);
         } else {
           router.push("/");
@@ -125,14 +130,14 @@ export default function DashboardPage() {
   return (
     <div className="animate-in fade-in duration-500">
       {/* Header section */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-start justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">Your Dashboard</h1>
-          <p className="text-sm text-neutral-400 mt-1">Plain-English Attendance Verdicts</p>
+          <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">Welcome, {studentName} 👋</h1>
+          <p className="text-sm text-neutral-400 mt-1">Manage your attendance targets</p>
         </div>
         <button 
           onClick={handleLogout}
-          className="p-2 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors"
+          className="p-2 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors mt-1"
           title="Log out"
         >
           <LogOut className="w-5 h-5" />
@@ -166,33 +171,6 @@ export default function DashboardPage() {
                 [&::-webkit-slider-thumb]:h-6
                 [&::-webkit-slider-thumb]:rounded-full
                 [&::-webkit-slider-thumb]:bg-white
-                [&::-webkit-slider-thumb]:border-[4px]
-                [&::-webkit-slider-thumb]:border-neutral-900
-                [&::-webkit-slider-thumb]:shadow-lg
-                [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:hover:scale-110
-                [&::-webkit-slider-thumb]:transition-transform"
-            />
-          </div>
-
-          {/* Upcoming Classes Slider */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-neutral-400 font-medium">Average Classes Left</p>
-              <span className="text-lg font-bold text-white tabular-nums">{upcoming}</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="60"
-              value={upcoming}
-              onChange={(e) => setUpcoming(Number(e.target.value))}
-              className="w-full h-2 bg-neutral-800 rounded-full appearance-none flex cursor-pointer
-                [&::-webkit-slider-thumb]:appearance-none
-                [&::-webkit-slider-thumb]:w-6
-                [&::-webkit-slider-thumb]:h-6
-                [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:bg-blue-500
                 [&::-webkit-slider-thumb]:border-[4px]
                 [&::-webkit-slider-thumb]:border-neutral-900
                 [&::-webkit-slider-thumb]:shadow-lg
