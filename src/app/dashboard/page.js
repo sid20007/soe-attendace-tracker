@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, SlidersHorizontal } from "lucide-react";
+import { LogOut, SlidersHorizontal, Info, X } from "lucide-react";
 
-function SubjectCard({ subject, target, upcoming }) {
+function SubjectCard({ subject, target, upcoming, plannedBunks }) {
   const { name, code, attended, total, exempted = 0 } = subject;
   
   const currentPercent = Math.round((subject.attended / subject.total) * 100) || 0;
   const projectedTotal = subject.total + upcoming;
   const mustAttend = Math.ceil((target) * projectedTotal) - subject.attended;
   const bunkable = upcoming - mustAttend;
+  const actualBunkable = bunkable - plannedBunks;
   const displayTarget = Math.round(target * 100);
 
   let verdictNode = null;
@@ -33,6 +34,15 @@ function SubjectCard({ subject, target, upcoming }) {
         </p>
       </div>
     );
+  } else if (actualBunkable < 0) {
+    verdictNode = (
+      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
+        <p className="text-[15px] leading-snug">
+          <span className="text-lg mr-2">⚠️</span>
+          You are planning to bunk too much! Cancel <span className="font-bold">{Math.abs(actualBunkable)}</span> planned bunks to stay safe.
+        </p>
+      </div>
+    );
   } else if (currentPercent < displayTarget && bunkable > 0) {
     verdictNode = (
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
@@ -47,7 +57,7 @@ function SubjectCard({ subject, target, upcoming }) {
       <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4 text-emerald-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">✅</span>
-          You are safe! You can confidently bunk <span className="font-bold">{bunkable}</span> of the next <span className="font-bold">{upcoming}</span> classes and stay above <span className="font-bold">{displayTarget}%</span>.
+          You are safe! Even with your planned bunks, you can skip <span className="font-bold">{actualBunkable}</span> more classes.
         </p>
       </div>
     );
@@ -83,6 +93,8 @@ export default function DashboardPage() {
   const [studentName, setStudentName] = useState("Student");
   const [target, setTarget] = useState(0.80);
   const [upcoming, setUpcoming] = useState(25); // Value kept constant for math logic, mapped out of UI
+  const [plannedBunks, setPlannedBunks] = useState(0);
+  const [showAlert, setShowAlert] = useState(true);
   const [loading, setLoading] = useState(true);
 
   // Load state from local storage
@@ -144,6 +156,29 @@ export default function DashboardPage() {
         </button>
       </div>
 
+      {/* Heads Up Banner */}
+      {showAlert && (
+        <div className="bg-amber-950/20 border border-amber-700/50 rounded-xl p-4 mb-6 relative animate-in fade-in slide-in-from-top-2 duration-300">
+          <button 
+            onClick={() => setShowAlert(false)}
+            className="absolute top-4 right-4 text-amber-500/70 hover:text-amber-400 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+          <div className="flex items-start gap-3">
+            <Info className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+            <div>
+              <h3 className="text-amber-500 font-semibold text-sm mb-2">Heads up — Read before using</h3>
+              <ul className="list-disc pl-4 space-y-1">
+                <li className="text-neutral-400 text-sm leading-relaxed">
+                  Keep a buffer. For best results, aim for at least 80% instead of cutting it close at 75%. Edge cases, surprise classes, or minor calculation drift can push you below the threshold.
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Global Controls Module */}
       <div className="sticky top-0 z-30 -mx-4 px-4 pt-2 pb-4 bg-neutral-950/90 backdrop-blur-xl border-b border-neutral-800/50 mb-6">
         <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
@@ -180,6 +215,31 @@ export default function DashboardPage() {
             />
           </div>
 
+          {/* Planned Bunks Counter */}
+          <div className="pt-2 border-t border-neutral-800/50">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-neutral-400 font-medium">Planned Bunks</p>
+                <p className="text-[11px] text-neutral-500 mt-0.5">Classes you already plan to skip</p>
+              </div>
+              <div className="flex items-center gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-1">
+                <button 
+                  onClick={() => setPlannedBunks(Math.max(0, plannedBunks - 1))}
+                  className="w-8 h-8 rounded-md flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                >
+                  -
+                </button>
+                <span className="w-6 text-center text-sm font-bold text-white tabular-nums">{plannedBunks}</span>
+                <button 
+                  onClick={() => setPlannedBunks(plannedBunks + 1)}
+                  className="w-8 h-8 rounded-md flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
+                >
+                  +
+                </button>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -191,7 +251,7 @@ export default function DashboardPage() {
             className="animate-in slide-in-from-bottom-4 shadow-xl"
             style={{ animationDelay: `${i * 100}ms`, animationFillMode: "both" }}
           >
-            <SubjectCard subject={sub} target={target} upcoming={upcoming} />
+            <SubjectCard subject={sub} target={target} upcoming={upcoming} plannedBunks={plannedBunks} />
           </div>
         ))}
       </div>
