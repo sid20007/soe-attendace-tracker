@@ -82,10 +82,9 @@ export async function POST(request) {
         headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
       });
       const htmlString = htmlResponse.data;
-      const nameMatch = htmlString.match(/Welcome\s+([^<]+)/i) || htmlString.match(/>([^<]+)<\/.*?>\s*Reg No/i) || htmlString.match(/user-name[^>]*>([^<]+)/i);
-      if (nameMatch && nameMatch[1]) {
-        studentName = nameMatch[1].trim();
-      }
+      const nameMatch = htmlString.match(/Welcome\s+([^<]+)/i) || htmlString.match(/(?<=profile-name"?[^>]*>)[^<]+/i) || htmlString.match(/<span[^>]*class="[^"]*name[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/i);
+      const rawName = nameMatch ? nameMatch[1].trim() : "Student";
+      studentName = rawName !== "Student" ? rawName.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : "Student";
     } catch (nameError) {
       console.error("Failed to extract student name:", nameError.message);
     }

@@ -3,86 +3,84 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, SlidersHorizontal, Info, X } from "lucide-react";
+import { motion } from "framer-motion";
 
-function SubjectCard({ subject, target, upcoming, plannedBunks }) {
-  const { name, code, attended, total, exempted = 0 } = subject;
+function SubjectCard({ subject, target }) {
+  const { name, code, attended, total } = subject;
   
-  const currentPercent = Math.round((subject.attended / subject.total) * 100) || 0;
-  const projectedTotal = subject.total + upcoming;
-  const maxPossiblePercent = projectedTotal > 0 ? Math.round(((subject.attended + upcoming) / projectedTotal) * 100) : 0;
-  const mustAttend = Math.ceil((target) * projectedTotal) - subject.attended;
-  const bunkable = upcoming - mustAttend;
-  const actualBunkable = bunkable - plannedBunks;
+  const targetDecimal = target;
   const displayTarget = Math.round(target * 100);
+  const currentPercent = Math.round((attended / total) * 100) || 0;
 
-  // Catch up formula
-  const catchUpClasses = Math.ceil((target * subject.total - subject.attended) / (1 - target));
+  // Formula for how many consecutive classes needed to hit target
+  const catchUpClasses = Math.ceil((targetDecimal * total - attended) / (1 - targetDecimal));
+
+  // Formula for how many consecutive classes can be missed before dropping below target
+  const safeToBunk = Math.floor((attended - (targetDecimal * total)) / targetDecimal);
 
   let verdictNode = null;
 
-  if (mustAttend > upcoming) {
+  if (currentPercent < displayTarget) {
     verdictNode = (
-      <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 mt-4 text-rose-500 font-medium">
+      <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-xl p-4 mt-4 font-medium backdrop-blur-sm">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">💀</span>
-          Mathematically cooked! Even if you attend all <span className="font-bold">{upcoming}</span> remaining classes, your max attendance will only reach <span className="font-bold">{maxPossiblePercent}%</span> (Your target is <span className="font-bold">{displayTarget}%</span>).
+          You are below target. You need to attend the next <span className="font-bold">{Math.max(0, catchUpClasses)}</span> classes in a row to reach <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
-  } else if (mustAttend === upcoming) {
+  } else if (safeToBunk === 0) {
     verdictNode = (
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
-        <p className="text-[15px] leading-snug">
-          <span className="text-lg mr-2">🚨</span>
-          Zero margin for error! You are currently at <span className="font-bold">{currentPercent}%</span>. You MUST attend ALL <span className="font-bold">{upcoming}</span> remaining classes to reach <span className="font-bold">{displayTarget}%</span>.
-        </p>
-      </div>
-    );
-  } else if (actualBunkable < 0) {
-    verdictNode = (
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
+      <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 rounded-xl p-4 mt-4 font-medium backdrop-blur-sm">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">⚠️</span>
-          You are planning to bunk too much! Cancel <span className="font-bold">{Math.abs(actualBunkable)}</span> planned bunks to stay safe above <span className="font-bold">{displayTarget}%</span>.
+          You are exactly on the borderline. Do not bunk the next class or you will drop below <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
-  } else if (currentPercent < displayTarget && bunkable > 0) {
+  } else {
     verdictNode = (
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
-        <p className="text-[15px] leading-snug">
-          <span className="text-lg mr-2">⚠️</span>
-          You are currently below target. You need to attend the next <span className="font-bold">{catchUpClasses}</span> classes in a row to get back to <span className="font-bold">{displayTarget}%</span>.
-        </p>
-      </div>
-    );
-  } else if (currentPercent >= displayTarget && bunkable >= 0) {
-    verdictNode = (
-      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4 text-emerald-500 font-medium">
+      <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-xl p-4 mt-4 font-medium backdrop-blur-sm">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">✅</span>
-          You are safe! You have a sufficient buffer to stay above <span className="font-bold">{displayTarget}%</span>.
+          You can bunk the next <span className="font-bold">{safeToBunk}</span> classes and still be in your <span className="font-bold">{displayTarget}%</span> target range.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 transition-all duration-200">
+    <div className="bg-neutral-900/40 backdrop-blur-xl border border-white/5 rounded-2xl p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:border-white/10">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h3 className="text-lg font-bold text-white leading-snug pr-2">{name}</h3>
+          <h3 className="text-lg font-bold text-white leading-snug pr-2 antialiased tracking-tight">{name}</h3>
           <p className="text-xs text-neutral-500 font-mono mt-1">{code || `SUB${subject.id}`}</p>
         </div>
         
         {/* Simple Current Attendance Badge */}
-        <div className="bg-neutral-800/80 border border-neutral-700/50 rounded-lg px-3 py-1.5 flex flex-col items-end shrink-0">
+        <div className="bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 flex flex-col items-end shrink-0 backdrop-blur-md">
           <span className="text-xs font-semibold text-white">
             {subject.attended} <span className="text-neutral-500 font-normal">/ {subject.total}</span>
           </span>
           <span className="text-[10px] text-neutral-400 mt-0.5 font-medium">{currentPercent}%</span>
         </div>
+      </div>
+
+      {/* Sleek Progress Bar */}
+      <div className="mt-4 bg-white/5 h-1.5 rounded-full overflow-hidden border border-white/5">
+        <motion.div 
+          initial={{ width: 0 }}
+          animate={{ width: `${currentPercent}%` }}
+          transition={{ duration: 1, ease: "easeOut", delay: 0.2 }}
+          className={`h-full rounded-full ${
+            currentPercent < displayTarget 
+              ? 'bg-gradient-to-r from-red-500 to-rose-400' 
+              : safeToBunk === 0 
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-400' 
+                : 'bg-gradient-to-r from-emerald-500 to-teal-400'
+          }`}
+        />
       </div>
 
       {/* The Verdict */}
@@ -94,10 +92,8 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
 export default function DashboardPage() {
   const router = useRouter();
   const [subjects, setSubjects] = useState([]);
-  const [studentName, setStudentName] = useState("Student");
+  const [studentName, setStudentName] = useState("");
   const [target, setTarget] = useState(0.80);
-  const [upcoming, setUpcoming] = useState(25); // Value kept constant for math logic, mapped out of UI
-  const [plannedBunks, setPlannedBunks] = useState(0);
   const [showAlert, setShowAlert] = useState(true);
   const [loading, setLoading] = useState(true);
 
@@ -109,7 +105,7 @@ export default function DashboardPage() {
         const parsed = JSON.parse(dataStr);
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.subjects) {
           setSubjects(parsed.subjects);
-          if (parsed.studentName) setStudentName(parsed.studentName);
+          setStudentName(parsed.studentName || "Student");
         } else if (Array.isArray(parsed) && parsed.length > 0) {
           // Fallback for old cached data format
           setSubjects(parsed);
@@ -144,7 +140,12 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="animate-in fade-in duration-500">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="antialiased"
+    >
       {/* Header section */}
       <div className="flex items-start justify-between mb-8">
         <div>
@@ -219,46 +220,23 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Planned Bunks Counter */}
-          <div className="pt-2 border-t border-neutral-800/50">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-neutral-400 font-medium">Planned Bunks</p>
-                <p className="text-[11px] text-neutral-500 mt-0.5">Classes you already plan to skip</p>
-              </div>
-              <div className="flex items-center gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-1">
-                <button 
-                  onClick={() => setPlannedBunks(Math.max(0, plannedBunks - 1))}
-                  className="w-8 h-8 rounded-md flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-                >
-                  -
-                </button>
-                <span className="w-6 text-center text-sm font-bold text-white tabular-nums">{plannedBunks}</span>
-                <button 
-                  onClick={() => setPlannedBunks(plannedBunks + 1)}
-                  className="w-8 h-8 rounded-md flex items-center justify-center text-neutral-400 hover:text-white hover:bg-neutral-800 transition-colors"
-                >
-                  +
-                </button>
-              </div>
-            </div>
-          </div>
-
         </div>
       </div>
 
       {/* Subject Feed */}
       <div className="space-y-4 pb-10">
         {subjects.map((sub, i) => (
-          <div 
+          <motion.div 
             key={sub.id} 
-            className="animate-in slide-in-from-bottom-4 shadow-xl"
-            style={{ animationDelay: `${i * 100}ms`, animationFillMode: "both" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.08, ease: "easeOut" }}
+            className="shadow-xl"
           >
-            <SubjectCard subject={sub} target={target} upcoming={upcoming} plannedBunks={plannedBunks} />
-          </div>
+            <SubjectCard subject={sub} target={target} />
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
