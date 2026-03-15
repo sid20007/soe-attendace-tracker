@@ -15,6 +15,9 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
   const actualBunkable = bunkable - plannedBunks;
   const displayTarget = Math.round(target * 100);
 
+  // Catch up formula
+  const catchUpClasses = Math.ceil((target * subject.total - subject.attended) / (1 - target));
+
   let verdictNode = null;
 
   if (mustAttend > upcoming) {
@@ -49,7 +52,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">⚠️</span>
-          You are currently below target. To reach <span className="font-bold">{displayTarget}%</span>, you must attend <span className="font-bold">{mustAttend}</span> more classes.
+          You are currently below target. You need to attend the next <span className="font-bold">{catchUpClasses}</span> classes in a row to get back to <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
