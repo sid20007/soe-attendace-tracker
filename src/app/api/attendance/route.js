@@ -3,11 +3,14 @@ import axios from 'axios';
 import { wrapper } from 'axios-cookiejar-support';
 import { CookieJar } from 'tough-cookie';
 
-// Setup axios with a cookie jar to automatically handle sessions/cookies
-const jar = new CookieJar();
-const client = wrapper(axios.create({ jar, withCredentials: true }));
+export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
+  // ISOLATE THE COOKIE/SESSION: 
+  // Instantiated inside POST to guarantee every request starts with an completely empty session.
+  const jar = new CookieJar();
+  const client = wrapper(axios.create({ jar, withCredentials: true }));
+
   try {
     const { register_no, password, semester } = await request.json();
 
@@ -20,7 +23,9 @@ export async function POST(request) {
 
     // 1. INITIAL GET: Visit login page to get the CSRF token
     const loginUrl = 'https://btechconnect.staloysius.edu.in/login';
-    const initialResponse = await client.get(loginUrl);
+    const initialResponse = await client.get(loginUrl, {
+      headers: { 'Cache-Control': 'no-store' }
+    });
     
     // Extract the _token using a simple regex to avoid Cheerio parsing overhead
     const tokenMatch = initialResponse.data.match(/name="_token"\s+value="([^"]+)"/);
@@ -39,9 +44,10 @@ export async function POST(request) {
     formData.append('register_no', register_no);
     formData.append('password', password);
 
+    let loginResponse;
     try {
       // SESSION HANDLING is managed automatically by axios-cookiejar-support
-      await client.post(loginPostUrl, formData, {
+      loginResponse = await client.post(loginPostUrl, formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
           'Referer': loginUrl,
@@ -52,17 +58,31 @@ export async function POST(request) {
     } catch (loginError) {
       console.error('Login POST failed:', loginError.message);
       return NextResponse.json(
-        { error: 'Invalid Credentials or Login Failed' },
+        { error: 'Invalid credentials' },
+        { status: 401 }
+      );
+    }
+
+    // STRICT LOGIN VALIDATION:
+    const responseUrl = loginResponse.request?.res?.responseUrl || loginResponse.config?.url || '';
+    const setCookieHeader = loginResponse.headers['set-cookie'] || loginResponse.headers['Set-Cookie'];
+    const cookiesInJar = jar.getCookiesSync(loginPostUrl).length > 0;
+    
+    if (responseUrl.includes('login') || (!setCookieHeader && !cookiesInJar)) {
+      return NextResponse.json(
+        { error: "Invalid credentials" }, 
         { status: 401 }
       );
     }
 
     // 3. FETCH DATA: Use exact cookies to GET the JSON API endpoint
     const fetchUrl = `https://btechconnect.staloysius.edu.in/attendance/fetch?semester=${semester}`;
-    const fetchResponse = await client.get(fetchUrl);
+    const fetchResponse = await client.get(fetchUrl, {
+      headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
+    });
 
     // If we got redirected back to login or the data isn't JSON, auth failed
-    if (fetchResponse.request.res.responseUrl.includes('/login') || typeof fetchResponse.data !== 'object') {
+    if (fetchResponse.request?.res?.responseUrl?.includes('/login') || typeof fetchResponse.data !== 'object') {
       return NextResponse.json(
         { error: 'Session invalid or failed to fetch valid JSON data' },
         { status: 401 }
@@ -76,9 +96,9 @@ export async function POST(request) {
       id: item.code || Math.random().toString(),
       name: item.title, 
       code: item.code,
-      attended: Number(item.presents || 0),    // Grabs the "9"
-      total: Number(item.conducted || 0),     // Grabs the "17"
-      exempted: Number(item.exempted || 0)    // Bonus: grabs your duty leaves!
+      attended: Number(item.presents || 0),    
+      total: Number(item.conducted || 0),     
+      exempted: Number(item.exempted || 0)    
     }));
 
     // Fallback Mock for Testing Local UI Development (if real arrays are empty while testing)
@@ -92,7 +112,7 @@ export async function POST(request) {
     }
 
     // Return the cleaned data
-    return NextResponse.json(cleanData, { status: 200 });
+    return NextResponse.json(cleanData, { status: 200, headers: { 'Cache-Control': 'no-store' } });
 
   } catch (error) {
     console.error('Attendance Fetch Error:', error);
