@@ -94,8 +94,8 @@ export async function POST(request) {
     // 4. FORMAT DATA
     const cleanData = rawData.map(item => {
       // STRICT MAPPING: The college API specifically uses 'presents' (plural) and 'conducted' as strings.
-      const attendedClasses = parseInt(item.presents, 10) || 0; 
-      const totalClasses = parseInt(item.conducted, 10) || 0;
+      const attendedClasses = parseInt(item.presents || item.present || 0, 10); 
+      const totalClasses = parseInt(item.conducted || item.total || 0, 10);
       const exemptedClasses = parseInt(item.exempted, 10) || 0;
 
       return {

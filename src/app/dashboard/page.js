@@ -75,9 +75,9 @@ function SubjectCard({ subject, target }) {
         {/* Simple Current Attendance Badge */}
         <div className="bg-neutral-800/80 border border-neutral-700/50 rounded-lg px-3 py-1.5 flex flex-col items-end shrink-0">
           <span className="text-xs font-semibold text-white">
-            {attendedWithLeaves} <span className="text-neutral-500 font-normal">/ {total}</span>
+            {subject.attended} <span className="text-neutral-500 font-normal">/ {subject.total}</span>
           </span>
-          <span className="text-[10px] text-neutral-400 mt-0.5 font-medium">{currentPercent.toFixed(0)}%</span>
+          <span className="text-[10px] text-neutral-400 mt-0.5 font-medium">{subject.total > 0 ? Math.round((subject.attended / subject.total) * 100) : 0}%</span>
         </div>
       </div>
 
