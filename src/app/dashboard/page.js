@@ -9,6 +9,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
   
   const currentPercent = Math.round((subject.attended / subject.total) * 100) || 0;
   const projectedTotal = subject.total + upcoming;
+  const maxPossiblePercent = projectedTotal > 0 ? Math.round(((subject.attended + upcoming) / projectedTotal) * 100) : 0;
   const mustAttend = Math.ceil((target) * projectedTotal) - subject.attended;
   const bunkable = upcoming - mustAttend;
   const actualBunkable = bunkable - plannedBunks;
@@ -21,7 +22,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
       <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 mt-4 text-rose-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">💀</span>
-          You&apos;re cooked! Even if you attend all <span className="font-bold">{upcoming}</span> remaining classes, you won&apos;t reach <span className="font-bold">{displayTarget}%</span>.
+          Mathematically cooked! Even if you attend all <span className="font-bold">{upcoming}</span> remaining classes, your max attendance will only reach <span className="font-bold">{maxPossiblePercent}%</span> (Your target is <span className="font-bold">{displayTarget}%</span>).
         </p>
       </div>
     );
@@ -39,7 +40,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
       <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">⚠️</span>
-          You are planning to bunk too much! Cancel <span className="font-bold">{Math.abs(actualBunkable)}</span> planned bunks to stay safe.
+          You are planning to bunk too much! Cancel <span className="font-bold">{Math.abs(actualBunkable)}</span> planned bunks to stay safe above <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
@@ -57,7 +58,7 @@ function SubjectCard({ subject, target, upcoming, plannedBunks }) {
       <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4 text-emerald-500 font-medium">
         <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">✅</span>
-          You are safe! Even with your planned bunks, you can skip <span className="font-bold">{actualBunkable}</span> more classes.
+          You are safe! Even with your planned bunks, you can skip <span className="font-bold">{actualBunkable}</span> more classes and stay above <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
