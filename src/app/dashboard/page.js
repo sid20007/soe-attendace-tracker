@@ -4,63 +4,53 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, SlidersHorizontal } from "lucide-react";
 
-function SubjectCard({ subject, target }) {
+function SubjectCard({ subject, target, upcoming }) {
   const { name, code, attended, total, exempted = 0 } = subject;
   
-  const attendedWithLeaves = attended + exempted;
-  const currentPercent = total > 0 ? (attendedWithLeaves / total) * 100 : 0;
-  
-  // Mathematical Margin: How far ahead or behind are we in terms of raw classes?
-  // attended >= target * total  ==>  margin >= 0 (Safe)
-  const margin = attendedWithLeaves - (target * total);
+  const currentPercent = Math.round((subject.attended / subject.total) * 100) || 0;
+  const projectedTotal = subject.total + upcoming;
+  const mustAttend = Math.ceil((target) * projectedTotal) - subject.attended;
+  const bunkable = upcoming - mustAttend;
+  const displayTarget = Math.round(target * 100);
 
-  // Let's determine the Verdict Box UI based on exact bounds
   let verdictNode = null;
 
-  if (margin < 0) {
-    // They are in a deficit. How many classes must they attend in a row to hit the target?
-    // (A + y) / (T + y) >= target  ==>  y >= (target * T - A) / (1 - target)
-    const mustAttend = Math.ceil(-margin / (1 - target));
-    
+  if (mustAttend > upcoming) {
     verdictNode = (
-      <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 mt-4">
-        <p className="text-[15px] font-medium text-rose-400 leading-snug">
+      <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 mt-4 text-rose-500 font-medium">
+        <p className="text-[15px] leading-snug">
           <span className="text-lg mr-2">💀</span>
-          You are severely cooked. You must attend the next <span className="font-bold text-rose-500">{mustAttend}</span> classes in a row just to get back on track.
+          You&apos;re cooked! Even if you attend all <span className="font-bold">{upcoming}</span> remaining classes, you won&apos;t reach <span className="font-bold">{displayTarget}%</span>.
         </p>
       </div>
     );
-  } else {
-    // They are currently safe (margin >= 0). How many can they bunk in a row?
-    // A / (T + x) >= target  ==>  x <= (A - target * T) / target
-    // target cannot be 0 for this formula, so guard against target = 0
-    let canBunk = 0;
-    if (target > 0) {
-      canBunk = Math.floor(margin / target);
-    } else {
-      canBunk = 999; // If target is 0%, they can bunk infinite classes...
-    }
-
-    if (canBunk > 0) {
-      verdictNode = (
-        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4">
-          <p className="text-[15px] font-medium text-emerald-400 leading-snug">
-            <span className="text-lg mr-2">✅</span>
-            You are safe! You can confidently bunk the next <span className="font-bold text-emerald-500">{canBunk}</span> classes.
-          </p>
-        </div>
-      );
-    } else {
-      // They are safe, but can't bunk even 1 class without dipping below the target.
-      verdictNode = (
-        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4">
-          <p className="text-[15px] font-medium text-amber-400 leading-snug">
-            <span className="text-lg mr-2">⚠️</span>
-            You are exactly on track. Do <span className="font-bold text-amber-500 text-underline">not</span> bunk the next class or you will drop below {Math.round(target * 100)}%.
-          </p>
-        </div>
-      );
-    }
+  } else if (mustAttend === upcoming) {
+    verdictNode = (
+      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
+        <p className="text-[15px] leading-snug">
+          <span className="text-lg mr-2">🚨</span>
+          Zero margin for error! You are currently at <span className="font-bold">{currentPercent}%</span>. You MUST attend ALL <span className="font-bold">{upcoming}</span> remaining classes to reach <span className="font-bold">{displayTarget}%</span>.
+        </p>
+      </div>
+    );
+  } else if (currentPercent < displayTarget && bunkable > 0) {
+    verdictNode = (
+      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4 text-amber-500 font-medium">
+        <p className="text-[15px] leading-snug">
+          <span className="text-lg mr-2">⚠️</span>
+          You are currently below target. To reach <span className="font-bold">{displayTarget}%</span>, you must attend <span className="font-bold">{mustAttend}</span> more classes. (You can only bunk <span className="font-bold">{bunkable}</span>).
+        </p>
+      </div>
+    );
+  } else if (currentPercent >= displayTarget && bunkable >= 0) {
+    verdictNode = (
+      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4 text-emerald-500 font-medium">
+        <p className="text-[15px] leading-snug">
+          <span className="text-lg mr-2">✅</span>
+          You are safe! You can confidently bunk <span className="font-bold">{bunkable}</span> of the next <span className="font-bold">{upcoming}</span> classes and stay above <span className="font-bold">{displayTarget}%</span>.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -77,7 +67,7 @@ function SubjectCard({ subject, target }) {
           <span className="text-xs font-semibold text-white">
             {subject.attended} <span className="text-neutral-500 font-normal">/ {subject.total}</span>
           </span>
-          <span className="text-[10px] text-neutral-400 mt-0.5 font-medium">{subject.total > 0 ? Math.round((subject.attended / subject.total) * 100) : 0}%</span>
+          <span className="text-[10px] text-neutral-400 mt-0.5 font-medium">{currentPercent}%</span>
         </div>
       </div>
 
@@ -91,6 +81,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [subjects, setSubjects] = useState([]);
   const [target, setTarget] = useState(0.80);
+  const [upcoming, setUpcoming] = useState(25);
   const [loading, setLoading] = useState(true);
 
   // Load state from local storage
@@ -184,6 +175,33 @@ export default function DashboardPage() {
             />
           </div>
 
+          {/* Upcoming Classes Slider */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm text-neutral-400 font-medium">Average Classes Left</p>
+              <span className="text-lg font-bold text-white tabular-nums">{upcoming}</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="60"
+              value={upcoming}
+              onChange={(e) => setUpcoming(Number(e.target.value))}
+              className="w-full h-2 bg-neutral-800 rounded-full appearance-none flex cursor-pointer
+                [&::-webkit-slider-thumb]:appearance-none
+                [&::-webkit-slider-thumb]:w-6
+                [&::-webkit-slider-thumb]:h-6
+                [&::-webkit-slider-thumb]:rounded-full
+                [&::-webkit-slider-thumb]:bg-blue-500
+                [&::-webkit-slider-thumb]:border-[4px]
+                [&::-webkit-slider-thumb]:border-neutral-900
+                [&::-webkit-slider-thumb]:shadow-lg
+                [&::-webkit-slider-thumb]:cursor-pointer
+                [&::-webkit-slider-thumb]:hover:scale-110
+                [&::-webkit-slider-thumb]:transition-transform"
+            />
+          </div>
+
         </div>
       </div>
 
@@ -195,7 +213,7 @@ export default function DashboardPage() {
             className="animate-in slide-in-from-bottom-4 shadow-xl"
             style={{ animationDelay: `${i * 100}ms`, animationFillMode: "both" }}
           >
-            <SubjectCard subject={sub} target={target} />
+            <SubjectCard subject={sub} target={target} upcoming={upcoming} />
           </div>
         ))}
       </div>
