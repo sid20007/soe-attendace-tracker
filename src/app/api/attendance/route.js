@@ -92,14 +92,21 @@ export async function POST(request) {
     const rawData = Array.isArray(fetchResponse.data) ? fetchResponse.data : [];
 
     // 4. FORMAT DATA
-    const cleanData = rawData.map(item => ({
-      id: item.code || Math.random().toString(),
-      name: item.title, 
-      code: item.code,
-      attended: Number(item.presents || 0),    
-      total: Number(item.conducted || 0),     
-      exempted: Number(item.exempted || 0)    
-    }));
+    const cleanData = rawData.map(item => {
+      // STRICT MAPPING: The college API specifically uses 'presents' (plural) and 'conducted' as strings.
+      const attendedClasses = parseInt(item.presents, 10) || 0; 
+      const totalClasses = parseInt(item.conducted, 10) || 0;
+      const exemptedClasses = parseInt(item.exempted, 10) || 0;
+
+      return {
+        id: item.code || Math.random().toString(),
+        name: item.title,
+        code: item.code,
+        attended: attendedClasses,
+        total: totalClasses,
+        exempted: exemptedClasses
+      };
+    });
 
     // Fallback Mock for Testing Local UI Development (if real arrays are empty while testing)
     if (cleanData.length === 0) {
