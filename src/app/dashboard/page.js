@@ -4,55 +4,63 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, SlidersHorizontal } from "lucide-react";
 
-function SubjectCard({ subject, target, upcoming }) {
+function SubjectCard({ subject, target }) {
   const { name, code, attended, total, exempted = 0 } = subject;
   
   const attendedWithLeaves = attended + exempted;
   const currentPercent = total > 0 ? (attendedWithLeaves / total) * 100 : 0;
-  const projectedTotal = total + upcoming;
   
-  // Calculate how many more classes they strictly need to attend
-  const mustAttend = Math.ceil(target * projectedTotal) - attendedWithLeaves;
-  
-  // Calculate how many upcoming classes they can safely skip
-  const bunkable = upcoming - mustAttend;
-  
-  // If they need to attend more classes than are actually left, they are cooked
-  const isCooked = mustAttend > upcoming;
+  // Mathematical Margin: How far ahead or behind are we in terms of raw classes?
+  // attended >= target * total  ==>  margin >= 0 (Safe)
+  const margin = attendedWithLeaves - (target * total);
 
-  // Let's determine the Verdict Box UI
+  // Let's determine the Verdict Box UI based on exact bounds
   let verdictNode = null;
 
-  if (isCooked) {
-    const extraNeeded = mustAttend - upcoming;
+  if (margin < 0) {
+    // They are in a deficit. How many classes must they attend in a row to hit the target?
+    // (A + y) / (T + y) >= target  ==>  y >= (target * T - A) / (1 - target)
+    const mustAttend = Math.ceil(-margin / (1 - target));
+    
     verdictNode = (
       <div className="bg-rose-500/10 border border-rose-500/30 rounded-xl p-4 mt-4">
         <p className="text-[15px] font-medium text-rose-400 leading-snug">
           <span className="text-lg mr-2">💀</span>
-          You&apos;re cooked! You need <span className="font-bold text-rose-500">{extraNeeded}</span> extra classes outside the syllabus to hit your target.
-        </p>
-      </div>
-    );
-  } else if (mustAttend > 0 && bunkable >= 0) {
-    verdictNode = (
-      <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4">
-        <p className="text-[15px] font-medium text-amber-400 leading-snug">
-          <span className="text-lg mr-2">⚠️</span>
-          You have to attend <span className="font-bold text-amber-500">{mustAttend}</span> more classes to be safe. 
-          <span className="text-amber-500/70 block mt-1 text-sm">(You can only bunk {bunkable}).</span>
+          You are severely cooked. You must attend the next <span className="font-bold text-rose-500">{mustAttend}</span> classes in a row just to get back on track.
         </p>
       </div>
     );
   } else {
-    // mustAttend <= 0 means they have already hit the target even without upcoming classes
-    verdictNode = (
-      <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4">
-        <p className="text-[15px] font-medium text-emerald-400 leading-snug">
-          <span className="text-lg mr-2">✅</span>
-          You are totally safe. You can bunk <span className="font-bold text-emerald-500">{upcoming}</span> classes.
-        </p>
-      </div>
-    );
+    // They are currently safe (margin >= 0). How many can they bunk in a row?
+    // A / (T + x) >= target  ==>  x <= (A - target * T) / target
+    // target cannot be 0 for this formula, so guard against target = 0
+    let canBunk = 0;
+    if (target > 0) {
+      canBunk = Math.floor(margin / target);
+    } else {
+      canBunk = 999; // If target is 0%, they can bunk infinite classes...
+    }
+
+    if (canBunk > 0) {
+      verdictNode = (
+        <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-4 mt-4">
+          <p className="text-[15px] font-medium text-emerald-400 leading-snug">
+            <span className="text-lg mr-2">✅</span>
+            You are safe! You can confidently bunk the next <span className="font-bold text-emerald-500">{canBunk}</span> classes.
+          </p>
+        </div>
+      );
+    } else {
+      // They are safe, but can't bunk even 1 class without dipping below the target.
+      verdictNode = (
+        <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-4 mt-4">
+          <p className="text-[15px] font-medium text-amber-400 leading-snug">
+            <span className="text-lg mr-2">⚠️</span>
+            You are exactly on track. Do <span className="font-bold text-amber-500 text-underline">not</span> bunk the next class or you will drop below {Math.round(target * 100)}%.
+          </p>
+        </div>
+      );
+    }
   }
 
   return (
@@ -83,7 +91,6 @@ export default function DashboardPage() {
   const router = useRouter();
   const [subjects, setSubjects] = useState([]);
   const [target, setTarget] = useState(0.80);
-  const [upcoming, setUpcoming] = useState(25);
   const [loading, setLoading] = useState(true);
 
   // Load state from local storage
@@ -143,7 +150,7 @@ export default function DashboardPage() {
 
       {/* Global Controls Module */}
       <div className="sticky top-0 z-30 -mx-4 px-4 pt-2 pb-4 bg-neutral-950/90 backdrop-blur-xl border-b border-neutral-800/50 mb-6">
-        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-6">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 space-y-4">
           
           <div className="flex items-center gap-2 text-neutral-300 pb-2 border-b border-neutral-800/50">
             <SlidersHorizontal className="w-4 h-4" />
@@ -177,33 +184,6 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* Upcoming Classes Slider */}
-          <div>
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm text-neutral-400 font-medium">Average Classes Left</p>
-              <span className="text-lg font-bold text-white tabular-nums">{upcoming}</span>
-            </div>
-            <input
-              type="range"
-              min="0"
-              max="60"
-              value={upcoming}
-              onChange={(e) => setUpcoming(Number(e.target.value))}
-              className="w-full h-2 bg-neutral-800 rounded-full appearance-none flex cursor-pointer
-                [&::-webkit-slider-thumb]:appearance-none
-                [&::-webkit-slider-thumb]:w-6
-                [&::-webkit-slider-thumb]:h-6
-                [&::-webkit-slider-thumb]:rounded-full
-                [&::-webkit-slider-thumb]:bg-blue-500
-                [&::-webkit-slider-thumb]:border-[4px]
-                [&::-webkit-slider-thumb]:border-neutral-900
-                [&::-webkit-slider-thumb]:shadow-lg
-                [&::-webkit-slider-thumb]:cursor-pointer
-                [&::-webkit-slider-thumb]:hover:scale-110
-                [&::-webkit-slider-thumb]:transition-transform"
-            />
-          </div>
-
         </div>
       </div>
 
@@ -215,7 +195,7 @@ export default function DashboardPage() {
             className="animate-in slide-in-from-bottom-4 shadow-xl"
             style={{ animationDelay: `${i * 100}ms`, animationFillMode: "both" }}
           >
-            <SubjectCard subject={sub} target={target} upcoming={upcoming} />
+            <SubjectCard subject={sub} target={target} />
           </div>
         ))}
       </div>
