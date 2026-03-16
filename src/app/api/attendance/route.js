@@ -6,8 +6,7 @@ import { CookieJar } from 'tough-cookie';
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
-  // ISOLATE THE COOKIE/SESSION: 
-  // Instantiated inside POST to guarantee every request starts with an completely empty session.
+
   const jar = new CookieJar();
   const client = wrapper(axios.create({ jar, withCredentials: true }));
 
@@ -21,13 +20,11 @@ export async function POST(request) {
       );
     }
 
-    // 1. INITIAL GET: Visit login page to get the CSRF token
     const loginUrl = 'https://btechconnect.staloysius.edu.in/login';
     const initialResponse = await client.get(loginUrl, {
       headers: { 'Cache-Control': 'no-store' }
     });
-    
-    // Extract the _token using a simple regex to avoid Cheerio parsing overhead
+
     const tokenMatch = initialResponse.data.match(/name="_token"\s+value="([^"]+)"/);
     const csrfToken = tokenMatch ? tokenMatch[1] : null;
 
@@ -35,10 +32,8 @@ export async function POST(request) {
       throw new Error('Could not find CSRF token on the login page.');
     }
 
-    // 2. LOGIN POST: Send credentials along with the token
     const loginPostUrl = 'https://btechconnect.staloysius.edu.in/login/email';
-    
-    // Format the payload as URL-encoded form data
+
     const formData = new URLSearchParams();
     formData.append('_token', csrfToken);
     formData.append('register_no', register_no);
@@ -46,7 +41,7 @@ export async function POST(request) {
 
     let loginResponse;
     try {
-      // SESSION HANDLING is managed automatically by axios-cookiejar-support
+
       loginResponse = await client.post(loginPostUrl, formData, {
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -63,7 +58,6 @@ export async function POST(request) {
       );
     }
 
-    // STRICT LOGIN VALIDATION:
     const responseUrl = loginResponse.request?.res?.responseUrl || loginResponse.config?.url || '';
     const setCookieHeader = loginResponse.headers['set-cookie'] || loginResponse.headers['Set-Cookie'];
     const cookiesInJar = jar.getCookiesSync(loginPostUrl).length > 0;
@@ -75,27 +69,29 @@ export async function POST(request) {
       );
     }
 
-
-
-    // 3. FETCH DATA: Use exact cookies to GET the JSON API endpoint
     const fetchUrl = `https://btechconnect.staloysius.edu.in/attendance/fetch?semester=${semester}`;
     const fetchResponse = await client.get(fetchUrl, {
       headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
     });
 
-    // If we got redirected back to login or the data isn't JSON, auth failed
-    if (fetchResponse.request?.res?.responseUrl?.includes('/login') || typeof fetchResponse.data !== 'object') {
-      return NextResponse.json(
-        { error: 'Session invalid or failed to fetch valid JSON data' },
-        { status: 401 }
-      );
+    let scrapedName = null;
+    try {
+        const homeUrl = 'https://btechconnect.staloysius.edu.in/home';
+        const homeResponse = await client.get(homeUrl);
+        const html = homeResponse.data;
+
+        const nameMatch = html.match(/<font[^>]*class=["']text-primary["'][^>]*>\s*([^<]+?)\s*<\/font>/i);
+        if (nameMatch && nameMatch[1]) {
+            scrapedName = nameMatch[1].trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+        }
+    } catch (error) {
+        console.error("Scraping error:", error);
     }
 
     const rawData = Array.isArray(fetchResponse.data) ? fetchResponse.data : [];
 
-    // 4. FORMAT DATA
     const cleanData = rawData.map(item => {
-      // STRICT MAPPING: The college API specifically uses 'presents' (plural) and 'conducted' as strings.
+
       const attendedClasses = parseInt(item.presents || item.present || 0, 10); 
       const totalClasses = parseInt(item.conducted || item.total || 0, 10);
       const exemptedClasses = parseInt(item.exempted, 10) || 0;
@@ -112,11 +108,12 @@ export async function POST(request) {
       };
     });
 
-
-
-    // Return the cleaned data WITH the name ID echo
     return NextResponse.json(
-      { studentName: register_no, subjects: cleanData }, 
+      { 
+        loginId: register_no, 
+        studentName: scrapedName, 
+        subjects: cleanData 
+      }, 
       { status: 200, headers: { 'Cache-Control': 'no-store' } }
     );
 

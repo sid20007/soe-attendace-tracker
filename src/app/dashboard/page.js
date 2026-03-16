@@ -5,12 +5,8 @@ import { useRouter } from "next/navigation";
 import { LogOut, SlidersHorizontal, Info, X, Calendar, Clock, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
 
-
-
-// --- DYNAMIC TIMETABLE ---
-// Mock structure using subject codes (adjust as necessary per actual branch codes)
 const masterTimetable = {
-  // PHYSICS CYCLE BRANCHES
+
   ISE: {
     Monday: ['25ENUBC101', '25ENUEC108', '25ENUHM115', '25ENUEC107', '25ENUBC100'],
     Tuesday: ['25ENUEC107', '25ENUHM114', '25ENUEC108', '25ENUEC109'],
@@ -27,7 +23,7 @@ const masterTimetable = {
     Friday: ['25ENUEC108', '25ENUEC107', '25ENUEC108', '25ENUBP101', '25ENUHM115'],
     Saturday: ['25ENUMC117', '25ENUBC101', '25ENUEC108']
   },
-  // CHEMISTRY CYCLE BRANCHES
+
   AIML: {
     Monday: ['CHEM_DE_LAB', 'CHEM_CHY', 'CHEM_TE', 'CHEM_PY'],
     Tuesday: ['CHEM_DE', 'CHEM_ES', 'CHEM_CHY', 'CHEM_M2', 'CHEM_CHY_LAB'],
@@ -55,7 +51,6 @@ const calculateExactRemaining = (subjectCode, branch, endDateStr) => {
   currentDate.setDate(currentDate.getDate() + 1); // Start tomorrow
   const endDate = new Date(endDateStr);
 
-  // Known St. Aloysius Holidays
   const holidays = ['2026-03-20', '2026-03-31', '2026-04-03', '2026-04-14'];
 
   while (currentDate <= endDate) {
@@ -77,7 +72,6 @@ const calculateExactRemaining = (subjectCode, branch, endDateStr) => {
   return remainingClasses;
 };
 
-// --- CLASS SLOT TIMINGS ---
 const slotTimes = [
   "09:00 AM - 09:50 AM",
   "09:50 AM - 10:40 AM",
@@ -95,29 +89,23 @@ function SubjectCard({ subject, target, endDate, branch, timeSlot }) {
   const displayTarget = Math.round(target * 100);
   const currentPercent = officialPercentage !== undefined ? officialPercentage : (Math.round((attended / total) * 100) || 0);
 
-  // Math projections
   const catchUpClasses = Math.ceil((targetDecimal * total - attended) / (1 - targetDecimal));
   const safeToBunk = Math.floor((attended - (targetDecimal * total)) / targetDecimal);
 
-  // exact remaining count lookup
   const exactRemaining = calculateExactRemaining(code, branch, endDate);
   const projectedTotal = total + exactRemaining;
   const maxPossiblePercent = ((attended + exactRemaining) / projectedTotal) * 100;
 
-  // Clamp negative numbers to 0 for a clean UI
   const displaySafeToBunk = Math.max(0, safeToBunk);
   const displayCatchUp = Math.max(0, catchUpClasses);
 
-  // Calculate how many EXTRA classes they would need beyond the semester to pass
   const targetAttendedNeeded = Math.ceil((targetDecimal) * projectedTotal);
   const maxAttendedPossible = attended + exactRemaining;
   const extraClassesNeeded = targetAttendedNeeded - maxAttendedPossible;
 
-
-
   return (
     <div key={subject.code} className="bg-[#18181b] rounded-[1.5rem] p-5 border border-white/5 shadow-2xl transition-transform hover:scale-[1.02]">
-      {/* Header */}
+
       <h3 className="text-lg font-semibold text-white tracking-tight truncate">{subject.name}</h3>
       {timeSlot && (
         <p className="text-xs font-semibold text-blue-400 font-mono mt-1 mb-2 flex items-center gap-1">
@@ -126,7 +114,6 @@ function SubjectCard({ subject, target, endDate, branch, timeSlot }) {
       )}
       <p className="text-sm text-neutral-500 font-mono mt-1">{subject.code}</p>
 
-      {/* Progress Bar */}
       <div className="mt-5 h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${currentPercent >= target ? 'bg-emerald-500' : 'bg-red-500'}`}
@@ -134,7 +121,6 @@ function SubjectCard({ subject, target, endDate, branch, timeSlot }) {
         />
       </div>
 
-      {/* Current Status */}
       <div className="flex justify-between items-center mt-3">
         <span className="text-sm text-neutral-400">Current</span>
         <div className="flex items-center gap-2">
@@ -147,11 +133,10 @@ function SubjectCard({ subject, target, endDate, branch, timeSlot }) {
 
       <hr className="border-white/5 my-5" />
 
-      {/* Action Blocks Conditional Render */}
       {maxPossiblePercent < displayTarget ? (
         <div className="bg-[#1A0B0B] border border-[#3A1616] rounded-xl p-4 flex items-center gap-4 my-3">
           <div className="bg-[#3A1616] text-[#FF453A] rounded-full p-1.5 flex-shrink-0">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
           </div>
           <div className="flex flex-col">
             <span className="text-[#FF453A] font-semibold text-sm mb-0.5">You're Cooked!</span>
@@ -167,7 +152,7 @@ function SubjectCard({ subject, target, endDate, branch, timeSlot }) {
             </span>
             <span className="text-xs text-neutral-500">classes</span>
           </div>
-          
+
           <div className="bg-white/5 rounded-xl py-4 flex flex-col items-center justify-center border border-white/5">
             <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Must Attend</span>
             <span className="text-4xl font-bold my-1 text-blue-500">
@@ -178,7 +163,6 @@ function SubjectCard({ subject, target, endDate, branch, timeSlot }) {
         </div>
       )}
 
-      {/* Footer Stats */}
       <div className="mt-5 space-y-2">
         <div className="flex justify-between items-center text-sm">
           <span className="text-neutral-500">Upcoming Classes</span>
@@ -197,6 +181,9 @@ export default function DashboardPage() {
   const router = useRouter();
   const [subjects, setSubjects] = useState([]);
   const [studentName, setStudentName] = useState("Student");
+  const [loginId, setLoginId] = useState("");
+  const [localName, setLocalName] = useState("");
+  const [isEditingName, setIsEditingName] = useState(false);
   const [branch, setBranch] = useState("UNKNOWN");
   const [selectedBranch, setSelectedBranch] = useState("UNKNOWN");
   const [target, setTarget] = useState(0.80);
@@ -204,12 +191,32 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [showWarning, setShowWarning] = useState(true);
 
-  // Initialize selectedBranch from localStorage on mount
   useEffect(() => {
     setSelectedBranch(localStorage.getItem('userBranch') || "UNKNOWN");
   }, []);
 
-  // Real-time clock setup
+  useEffect(() => {
+    const savedName = localStorage.getItem('student_name');
+    if (savedName) {
+      if (/^\d+$/.test(savedName) || savedName.toLowerCase() === 'student') {
+
+        localStorage.removeItem('student_name');
+        setLocalName("");
+      } else {
+        setLocalName(savedName);
+      }
+    }
+  }, []);
+
+  const handleNameSave = (e) => {
+    if (e.key === 'Enter' || e.type === 'blur') {
+      setIsEditingName(false);
+      const finalName = localName.trim() === '' ? 'Student' : localName.trim();
+      setLocalName(finalName);
+      localStorage.setItem('student_name', finalName);
+    }
+  };
+
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -217,7 +224,6 @@ export default function DashboardPage() {
     return () => clearInterval(timer);
   }, []);
 
-  // Load state from local storage
   useEffect(() => {
     const dataStr = localStorage.getItem("attendanceData");
     if (dataStr) {
@@ -227,6 +233,15 @@ export default function DashboardPage() {
         if (parsed && typeof parsed === 'object' && !Array.isArray(parsed) && parsed.subjects) {
           setSubjects(parsed.subjects);
           setStudentName(parsed.studentName || "Student");
+
+          const id = parsed.loginId || (/^\d+$/.test(parsed.studentName) ? parsed.studentName : "");
+          setLoginId(id);
+
+          if (parsed.studentName && !/^\d+$/.test(parsed.studentName)) {
+            setLocalName(parsed.studentName);
+            localStorage.setItem('student_name', parsed.studentName);
+          }
+
           const b = parsed.branch || "UNKNOWN";
           setBranch(b);
           if (b !== "UNKNOWN") {
@@ -271,8 +286,6 @@ export default function DashboardPage() {
   const branchTimetable = masterTimetable[activeBranch] || masterTimetable["UNKNOWN"];
   const todayCodes = branchTimetable[currentDayName] || [];
 
-
-
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -280,16 +293,54 @@ export default function DashboardPage() {
       transition={{ duration: 0.5 }}
       className="antialiased min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden p-4 sm:p-6"
     >
-      {/* ROW 1: Header / Live Clock */}
+
       <div className="flex items-start justify-between mb-8">
-        <div>
-          <div className="flex items-center gap-2 mb-2 text-neutral-400">
-            <Clock className="w-4 h-4" />
-            <span className="text-sm font-medium tracking-wide">
-              {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })} • {time.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}
-            </span>
+        <div className="flex items-center gap-4">
+
+          {loginId ? (
+            <div className="w-14 h-14 rounded-full overflow-hidden border-2 border-[#D9A02A]/30 shadow-[0_0_15px_rgba(217,160,42,0.15)] flex-shrink-0 bg-[#1A1408]">
+              <img
+                src={`https://btechconnect.staloysius.edu.in/storage/photos/${loginId}.jpg`}
+                alt="Profile"
+                referrerPolicy="no-referrer"
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.src = `https://ui-avatars.com/api/?name=Student&background=1A1408&color=D9A02A`;
+                }}
+              />
+            </div>
+          ) : (
+            <div className="w-14 h-14 rounded-full border-2 border-white/10 bg-white/5 animate-pulse flex-shrink-0" />
+          )}
+
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2">
+              <span className="text-3xl font-bold text-white tracking-tight">Welcome,</span>
+              {isEditingName ? (
+                <input
+                  autoFocus
+                  className="bg-neutral-900 border border-white/20 text-3xl font-bold text-white tracking-tight rounded-md px-2 py-0 outline-none focus:border-[#D9A02A] w-auto min-w-[150px]"
+                  value={localName}
+                  onChange={(e) => setLocalName(e.target.value)}
+                  onKeyDown={handleNameSave}
+                  onBlur={handleNameSave}
+                  placeholder="Type your name..."
+                />
+              ) : (
+                <span
+                  className="text-3xl font-bold text-white tracking-tight cursor-pointer hover:text-neutral-400 transition-colors border-b border-dashed border-transparent hover:border-neutral-500"
+                  onClick={() => setIsEditingName(true)}
+                  title="Click to edit name"
+                >
+                  {localName || loginId}
+                </span>
+              )}
+              <span className="text-3xl font-bold text-white tracking-tight"></span>
+            </div>
+            <p className="text-neutral-400 font-medium tracking-wide text-sm mt-1">
+              {activeBranch !== "UNKNOWN" ? activeBranch : "Student"} • {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Welcome, {studentName} 👋</h1>
         </div>
         <button
           onClick={handleLogout}
@@ -300,15 +351,14 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {/* WARNING BANNER */}
       {showWarning && (
-        <motion.div 
-          initial={{ opacity: 0, y: -10 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="bg-[#130E05] border border-[#2B1D0E] rounded-2xl p-5 mb-8 flex gap-4 relative overflow-hidden"
         >
           <div className="bg-[#2B1D0E] text-[#ECA239] rounded-full p-1.5 h-fit flex-shrink-0 flex items-center justify-center shadow-inner">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
           </div>
           <div className="flex-1">
             <h3 className="text-[#ECA239] font-bold text-lg mb-4 flex items-center justify-between">
@@ -335,7 +385,6 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      {/* ROW 2: Semester Settings Card */}
       <div className="bg-[#111111] border border-white/5 rounded-[2rem] p-6 mb-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] pointer-events-none" />
 
@@ -345,7 +394,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-          {/* Target Slider */}
+
           <div>
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm text-neutral-400 font-medium">Target Attendance</p>
@@ -364,7 +413,6 @@ export default function DashboardPage() {
             />
           </div>
 
-          {/* End Date Controller */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm text-neutral-400 font-medium">Semester End Date</p>
@@ -387,7 +435,6 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* ROW 3: Today's Hitlist */}
       <div className="mb-10">
         <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
           ⚡ Today&apos;s Hitlist
@@ -445,7 +492,6 @@ export default function DashboardPage() {
         )}
       </div>
 
-      {/* ROW 4: All Subjects Bento Grid */}
       <div>
         <h2 className="text-xl font-bold text-white mb-4">📚 All Subjects</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-10">
