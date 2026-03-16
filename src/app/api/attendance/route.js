@@ -75,19 +75,7 @@ export async function POST(request) {
       );
     }
 
-    // 2.5: EXTRACT STUDENT NAME
-    let studentName = "Student";
-    try {
-      const htmlResponse = await client.get('https://btechconnect.staloysius.edu.in/attendance', {
-        headers: { 'Cache-Control': 'no-store', 'Pragma': 'no-cache' }
-      });
-      const htmlString = htmlResponse.data;
-      const nameMatch = htmlString.match(/Welcome\s+([^<]+)/i) || htmlString.match(/(?<=profile-name"?[^>]*>)[^<]+/i) || htmlString.match(/<span[^>]*class="[^"]*name[^"]*"[^>]*>\s*([^<]+)\s*<\/span>/i);
-      const rawName = nameMatch ? nameMatch[1].trim() : "Student";
-      studentName = rawName !== "Student" ? rawName.split(/\s+/).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : "Student";
-    } catch (nameError) {
-      console.error("Failed to extract student name:", nameError.message);
-    }
+
 
     // 3. FETCH DATA: Use exact cookies to GET the JSON API endpoint
     const fetchUrl = `https://btechconnect.staloysius.edu.in/attendance/fetch?semester=${semester}`;
@@ -111,6 +99,7 @@ export async function POST(request) {
       const attendedClasses = parseInt(item.presents || item.present || 0, 10); 
       const totalClasses = parseInt(item.conducted || item.total || 0, 10);
       const exemptedClasses = parseInt(item.exempted, 10) || 0;
+      const officialPercentage = parseFloat(item.percentage) || 0;
 
       return {
         id: item.code || Math.random().toString(),
@@ -118,26 +107,16 @@ export async function POST(request) {
         code: item.code,
         attended: attendedClasses,
         total: totalClasses,
-        exempted: exemptedClasses
+        exempted: exemptedClasses,
+        officialPercentage
       };
     });
 
-    // Fallback Mock for Testing Local UI Development (if real arrays are empty while testing)
-    if (cleanData.length === 0) {
-      console.log('No data returned from array, falling back to mock JSON for testing.');
-      return NextResponse.json({
-        studentName: "Mock Student",
-        subjects: [
-          { id: "MAT101", name: `Engineering Mathematics (Sem ${semester})`, code: "MAT101", attended: 24, total: 30 },
-          { id: "ELE102", name: `Basic Electronics (Sem ${semester})`, code: "ELE102", attended: 18, total: 25 },
-          { id: "CS103", name: `Python Programming (Sem ${semester})`, code: "CS103", attended: 35, total: 40 }
-        ]
-      }, { status: 200 });
-    }
 
-    // Return the cleaned data WITH the name
+
+    // Return the cleaned data WITH the name ID echo
     return NextResponse.json(
-      { studentName: studentName, subjects: cleanData }, 
+      { studentName: register_no, subjects: cleanData }, 
       { status: 200, headers: { 'Cache-Control': 'no-store' } }
     );
 

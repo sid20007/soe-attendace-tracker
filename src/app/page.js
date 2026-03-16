@@ -50,11 +50,11 @@ export default function LoginPage() {
   const canSubmit = registerNo.trim().length > 0 && password.trim().length > 0 && !isLoading;
 
   return (
-    <div className="fixed inset-0 bg-neutral-950 flex items-center justify-center p-5 z-50">
+    <div className="fixed inset-0 min-h-[100dvh] w-full max-w-[100vw] overflow-x-hidden bg-neutral-950 flex items-center justify-center p-5 z-50">
       {/* Ambient glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-blue-600/8 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="w-full max-w-sm relative">
+      <div className="w-full max-w-md relative">
         {/* Shield icon */}
         <div className="flex justify-center mb-6">
           <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-neutral-800 to-neutral-900 border border-neutral-700/50 flex items-center justify-center shadow-2xl">
