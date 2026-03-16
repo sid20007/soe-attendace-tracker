@@ -77,7 +77,11 @@ export async function POST(request) {
     let scrapedName = null;
     try {
         const homeUrl = 'https://btechconnect.staloysius.edu.in/home';
-        const homeResponse = await client.get(homeUrl);
+        const homeResponse = await client.get(homeUrl, {
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            }
+        });
         const html = homeResponse.data;
 
         const nameMatch = html.match(/<font[^>]*class=["']text-primary["'][^>]*>\s*([^<]+?)\s*<\/font>/i);
