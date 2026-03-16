@@ -1,8 +1,15 @@
 import "./globals.css";
 
 export const metadata = {
-  title: "SOE Attendance Tracker",
-  description: "Attendance tracker for SOE students.",
+  title: "Student Connect",
+  description: "Smart attendance tracker and timetable.",
+  manifest: "/manifest.json",
+  themeColor: "#000000",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Student Connect",
+  },
 };
 
 export const viewport = { width: 'device-width', initialScale: 1, maximumScale: 1, userScalable: false, themeColor: '#000000' };
