@@ -12,6 +12,7 @@ export async function POST(request) {
 
   try {
     const { register_no, password, semester } = await request.json();
+    console.log("API received request parameters:", { register_no, hasPassword: !!password, semester });
 
     if (!register_no || !password || !semester) {
       return NextResponse.json(
@@ -112,10 +113,27 @@ export async function POST(request) {
       };
     });
 
+    // Bulletproof Branch Routing based on Registration Number
+    const regNumber = parseInt(register_no, 10);
+    let derivedBranch = "UNKNOWN";
+
+    if (regNumber >= 25190101 && regNumber <= 25190157) {
+        derivedBranch = "CSE";
+    } else if (regNumber >= 25191101 && regNumber <= 25191160) {
+        derivedBranch = "AIML";
+    } else if (regNumber >= 25192101 && regNumber <= 25192151) {
+        derivedBranch = "ISE";
+    } else if (regNumber >= 25195101 && regNumber <= 25195141) {
+        derivedBranch = "ECE";
+    } else {
+        console.log(`Registration number ${regNumber} falls outside known ranges.`);
+    }
+
     return NextResponse.json(
       { 
         loginId: register_no, 
         studentName: scrapedName, 
+        branch: derivedBranch, 
         subjects: cleanData 
       }, 
       { status: 200, headers: { 'Cache-Control': 'no-store' } }

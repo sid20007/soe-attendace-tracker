@@ -32,10 +32,11 @@ export default function LoginPage() {
       }
 
       const data = await response.json();
-      
+
       // Save to localStorage for the dashboard to read
-      localStorage.setItem("attendanceData", JSON.stringify(data));
-      
+      localStorage.setItem("attendanceData", JSON.stringify({ ...data, semester }));
+      sessionStorage.setItem("temp_password", password);
+
       // Navigate to the dashboard
       router.push("/dashboard");
 
@@ -145,7 +146,7 @@ export default function LoginPage() {
                 {/* Custom dropdown arrow */}
                 <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-500">
                   <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </div>
               </div>
@@ -173,7 +174,10 @@ export default function LoginPage() {
         <div className="text-center mt-6 space-y-1">
           <p className="text-[11px] text-neutral-600 leading-relaxed">
             Your credentials are used only to fetch data from<br />
-            the university portal. Stored locally on your device.
+            the university portal. Stored locally on your device and aren't saved on the servers<br />
+            though session cookies are cached to improve speed :D.<br />
+            Since the project is running on alot of free services there might be lag or issues!<br />
+
           </p>
         </div>
       </div>
