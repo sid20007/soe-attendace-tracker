@@ -556,13 +556,13 @@ export default function DashboardPage() {
             reader.readAsDataURL(e.target.files[0]);
           }
         }} />
-      <div className="flex items-start justify-between mb-8">
-        <div className="flex items-center gap-4">
+      <div className="flex items-start justify-between mb-8 gap-2">
+        <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
 
           {loginId ? (
             <div 
               onClick={() => fileInputRef.current.click()}
-              className={`relative w-14 h-14 rounded-full overflow-hidden border-2 flex-shrink-0 bg-[#1A1408] cursor-pointer group transition-all duration-700 ease-in-out ${profileRingColor} ${profileGlow}`}
+              className={`relative w-12 h-12 sm:w-14 sm:h-14 rounded-full overflow-hidden border-2 flex-shrink-0 bg-[#1A1408] cursor-pointer group transition-all duration-700 ease-in-out ${profileRingColor} ${profileGlow}`}
               title="Click to change profile picture"
             >
               <img 
@@ -581,27 +581,28 @@ export default function DashboardPage() {
               </div>
             </div>
           ) : (
-            <div className="w-14 h-14 rounded-full border-2 border-white/10 bg-white/5 animate-pulse flex-shrink-0" />
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full border-2 border-white/10 bg-white/5 animate-pulse flex-shrink-0" />
           )}
 
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2">
-              <span className="text-3xl font-bold text-white tracking-tight">Welcome,</span>
-              <span className="text-3xl font-bold text-white tracking-tight">
+          <div className="flex flex-col min-w-0">
+            <div className="flex flex-row flex-wrap items-center gap-x-1 sm:gap-2">
+              <span className="text-xl sm:text-3xl font-bold text-white tracking-tight">Welcome,</span>
+              <span className="text-xl sm:text-3xl font-bold text-white tracking-tight truncate">
                 {loginId || "Student"}
               </span>
             </div>
-            <p className="text-neutral-400 font-medium tracking-wide text-sm mt-1">
-              {activeBranch !== "UNKNOWN" ? activeBranch : "Student"} • {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            <p className="text-neutral-400 font-medium tracking-wide text-[11px] sm:text-sm mt-0.5 sm:mt-1 truncate">
+              {activeBranch !== "UNKNOWN" ? activeBranch : "Student"} • {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
             </p>
           </div>
         </div>
         <button
           onClick={handleLogout}
-          className="p-2 text-neutral-500 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-colors mt-1 bg-neutral-900 border border-neutral-800"
+          className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-rose-400 hover:text-rose-300 bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 rounded-xl transition-all shadow-sm active:scale-95"
           title="Log out"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-4 h-4" />
+          <span className="hidden sm:inline">Log Out</span>
         </button>
       </div>
 
