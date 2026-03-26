@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut, SlidersHorizontal, Info, X, Calendar, Clock, GraduationCap } from "lucide-react";
 import { motion } from "framer-motion";
+import CollisionEngine from "@/components/CollisionEngine";
 
 const masterTimetable = {
   "ISE": {
@@ -851,6 +852,10 @@ export default function DashboardPage() {
             <p className="text-neutral-500 text-sm">You are free today! Enjoy the break or study. 🎉</p>
           </div>
         )}
+      </div>
+
+      <div className="mb-10">
+        <CollisionEngine />
       </div>
 
       <div>
