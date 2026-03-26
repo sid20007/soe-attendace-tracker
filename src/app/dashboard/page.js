@@ -398,28 +398,6 @@ export default function DashboardPage() {
     setSelectedBranch(localStorage.getItem('userBranch') || "UNKNOWN");
   }, []);
 
-  useEffect(() => {
-    const savedName = localStorage.getItem('student_name');
-    if (savedName) {
-      if (/^\d+$/.test(savedName) || savedName.toLowerCase() === 'student' || savedName === 'Demo Student') {
-
-        localStorage.removeItem('student_name');
-        setLocalName("");
-      } else {
-        setLocalName(savedName);
-      }
-    }
-  }, []);
-
-  const handleNameSave = (e) => {
-    if (e.key === 'Enter' || e.type === 'blur') {
-      setIsEditingName(false);
-      const finalName = localName.trim() === '' ? 'Student' : localName.trim();
-      setLocalName(finalName);
-      localStorage.setItem('student_name', finalName);
-    }
-  };
-
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -440,11 +418,6 @@ export default function DashboardPage() {
 
           const id = parsed.loginId || (/^\d+$/.test(parsed.studentName) ? parsed.studentName : "");
           setLoginId(id);
-
-          if (parsed.studentName && !/^\d+$/.test(parsed.studentName)) {
-            setLocalName(parsed.studentName);
-            localStorage.setItem('student_name', parsed.studentName);
-          }
 
           const b = parsed.branch || "UNKNOWN";
           setBranch(b);
@@ -503,11 +476,6 @@ export default function DashboardPage() {
         if (data.branch && data.branch !== "UNKNOWN") {
           setHitlistBranch(data.branch);
           setSelectedBranch(data.branch);
-        }
-
-        if (data.studentName) {
-          setLocalName(data.studentName);
-          localStorage.setItem('student_name', data.studentName);
         }
 
         const currentData = JSON.parse(localStorage.getItem("attendanceData") || "{}");
@@ -604,7 +572,7 @@ export default function DashboardPage() {
                 className="w-full h-full object-cover transition-opacity group-hover:opacity-40"
                 onError={(e) => {
                   if (!customAvatar) {
-                    e.target.src = `https://ui-avatars.com/api/?name=${localName || 'Student'}&background=1A1408&color=D9A02A`;
+                    e.target.src = `https://ui-avatars.com/api/?name=${loginId || 'Student'}&background=1A1408&color=D9A02A`;
                   }
                 }}
               />
