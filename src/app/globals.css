@@ -2,7 +2,7 @@
 @import "tailwindcss";
 
 @layer base {
-  * {
+  * { 
     @apply border-neutral-800;
   }
   body {
