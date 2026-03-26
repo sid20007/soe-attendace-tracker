@@ -1,0 +1,20 @@
+﻿b7fe127 feat: Remove redundant login portal from root and add CampusOS Header Logout button
+7c41185 feat: Upgraded to Premium CampusOS Layout, added Global Login, and restored live backend scraper
+d74cef0 feat: Integrated CampusOS Layout and Bunk Forecaster
+617671d Refactor and Clean Up Dashboard, Timetable Layouts, and Analytics
+07b5160 feat: bypass firewall for name scraper
+2df6cb3 feat: click-to-edit name & state cleaner
+18e5499 feat: setup PWA manifest and metadata
+5255870 Update README with new dashboard features
+7f803a9 Resolve README.md conflict from remote
+a6f9e66 Complete dashboard redesign & precise calculations update
+5321674 Revise README for B.Tech Connect Attendance Tracker
+f96c29c Added footer 'Made by Sid from ISE'
+616688d Dashboard UI upgrades, consecutive math logic, and student name extraction
+98e4ddb feat(ui): implement immediate catch-up formula for below-target amber verdict
+63678b7 fix(ui): remove explicit bunking class counts from safety and warning verdicts
+9b9caed fix(ui): correct hardcoded string interpolation to use dynamic target and show mathematically max possible attendance
+8234c42 feat(ui): add heads up safety banner and planned bunks buffer feature to dashboard margin calculations
+f19392b feat(api/ui): extract student name via regex and present in personalized dashboard header while hiding upcoming slider
+e937007 fix(ui): apply strict, realistic fallback messaging for attendance verdicts using upcoming classes projection
+4cf6867 fix: resolve attended/total data mirroring bug and strict JSX badge rendering

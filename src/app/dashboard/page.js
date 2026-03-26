@@ -373,8 +373,6 @@ export default function DashboardPage() {
   const [subjects, setSubjects] = useState([]);
   const [studentName, setStudentName] = useState("Student");
   const [loginId, setLoginId] = useState("");
-  const [localName, setLocalName] = useState("");
-  const [isEditingName, setIsEditingName] = useState(false);
   const [branch, setBranch] = useState("UNKNOWN");
   const [selectedBranch, setSelectedBranch] = useState("UNKNOWN");
   const [target, setTarget] = useState(0.80);
@@ -621,26 +619,9 @@ export default function DashboardPage() {
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-3xl font-bold text-white tracking-tight">Welcome,</span>
-              {isEditingName ? (
-                <input
-                  autoFocus
-                  className="bg-neutral-900 border border-white/20 text-3xl font-bold text-white tracking-tight rounded-md px-2 py-0 outline-none focus:border-[#D9A02A] w-auto min-w-[150px]"
-                  value={localName}
-                  onChange={(e) => setLocalName(e.target.value)}
-                  onKeyDown={handleNameSave}
-                  onBlur={handleNameSave}
-                  placeholder="Type your name..."
-                />
-              ) : (
-                <span
-                  className="text-3xl font-bold text-white tracking-tight cursor-pointer hover:text-neutral-400 transition-colors border-b border-dashed border-transparent hover:border-neutral-500"
-                  onClick={() => setIsEditingName(true)}
-                  title="Click to edit name"
-                >
-                  {localName || loginId}
-                </span>
-              )}
-              <span className="text-3xl font-bold text-white tracking-tight"></span>
+              <span className="text-3xl font-bold text-white tracking-tight">
+                {loginId || "Student"}
+              </span>
             </div>
             <p className="text-neutral-400 font-medium tracking-wide text-sm mt-1">
               {activeBranch !== "UNKNOWN" ? activeBranch : "Student"} • {time.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
