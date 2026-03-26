@@ -812,57 +812,37 @@ export default function DashboardPage() {
                 return false;
               });
 
-              if (userSubjectData && activeHitlistBranch === activeBranch) {
-                return (
-                  <motion.div
-                    key={`hitlist-${displayCode}-${index}`}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
-                    className={`h-full ${slot.isLab ? 'md:col-span-2' : ''}`}
-                  >
-                    <div className="relative h-full">
-                      {slot.isLab && (
-                        <span className="absolute -top-1.5 right-4 bg-purple-500/20 text-purple-400 text-[9px] font-bold px-2 py-0.5 rounded-md border border-purple-500/30 z-10 tracking-wider">
-                          {userBatch} LAB
-                        </span>
-                      )}
-                      <SubjectCard
-                        subject={userSubjectData}
-                        target={target}
-                        endDate={endDate}
-                        branch={activeBranch}
-                        timeSlot={`${slot.start} - ${slot.end}`}
-                        customTitle={displayCode}
-                      />
+              return (
+                <motion.div
+                  key={`hitlist-${displayCode}-${index}`}
+                  initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
+                  className={`h-full ${slot.isLab ? 'md:col-span-2' : ''}`}
+                >
+                  <div className="bg-[#18181b] border border-white/5 rounded-[1.5rem] p-5 shadow-lg flex flex-col justify-center border-l-4 border-l-neutral-700 h-full relative overflow-hidden">
+                    <div className="absolute -right-4 -bottom-4 opacity-[0.05] pointer-events-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor" className="text-neutral-500"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" /></svg>
                     </div>
-                  </motion.div>
-                );
-              } else {
-                return (
-                  <motion.div
-                    key={`hitlist-${displayCode}-${index}`}
-                    initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.1 }}
-                    className="h-full"
-                  >
-                    <div className="bg-[#18181b] border border-white/5 rounded-[1.5rem] p-5 shadow-lg flex flex-col justify-center border-l-4 border-l-neutral-700 h-full relative overflow-hidden">
-                      <div className="absolute -right-4 -bottom-4 opacity-[0.05] pointer-events-none">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="currentColor" className="text-neutral-500"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-14c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm0 10c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4z" /></svg>
-                      </div>
-                      <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2 flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-neutral-500" />
-                        Class in Session
+                    {slot.isLab && (
+                      <span className="absolute top-4 right-4 bg-purple-500/10 text-purple-400 text-[10px] font-bold px-2 py-0.5 rounded-md border border-purple-500/20 z-10 tracking-wider">
+                        {userBatch} LAB
                       </span>
-                      <h3 className="text-base font-semibold text-white/90 tracking-tight truncate">
-                        {userSubjectData ? userSubjectData.name : (subjectNamesLookup[displayCode] || displayCode)}
-                      </h3>
-                      {slot.start && (
-                        <p className="text-[11px] font-medium text-neutral-500 font-mono mt-1 flex items-center gap-1">
-                          {slot.start} - {slot.end}
-                        </p>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              }
+                    )}
+                    <span className="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2 flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                      Scheduled Class
+                    </span>
+                    <h3 className="text-base font-semibold text-white/90 tracking-tight truncate pr-16">
+                      {userSubjectData ? userSubjectData.name : (subjectNamesLookup[displayCode] || displayCode)}
+                    </h3>
+                    {slot.start && (
+                      <p className="text-[12px] font-medium text-blue-400/80 font-mono mt-1.5 flex items-center gap-1.5">
+                        <Clock className="w-3.5 h-3.5"/>
+                        {slot.start} - {slot.end}
+                      </p>
+                    )}
+                  </div>
+                </motion.div>
+              );
             })}
           </div>
         ) : (
