@@ -9,14 +9,14 @@ A sleek, privacy-first attendance tracker for students of St. Aloysius College (
 ## Features
 
 - 🔐 **Secure login** — authenticates against the live `btechconnect` portal using CSRF-safe session handling router echoes.
-- 📊 **Subject-wise attendance cards** — shows attended / total classes and current percentage with accurate dynamic width bar gauges.
+- 🍱 **Premium Bento Grid UI** — a futuristic dashboard that surfaces key actions without navigation bloat.
+- 📊 **Real-Time Attendance Gauges** — conditional ring colors (red/yellow/emerald) dynamically scale to your lowest active subject percentage.
+- 📡 **Live Radar Engine** — scans the loaded master timetable to display exact countdown metrics for your upcoming classes.
+- 🔮 **Bunk Forecaster** — instantly simulate day skips and see mathematical projections of your global health.
+- 🔒 **The Vault** — interactive staging area for Previous Year Questions (PYQs) and Lab Manuals.
+- 🎉 **Resoenance Fest Mode** — hidden event mode toggle to drop the whole app into an animated dark-space disco theme.
 - 🎯 **Adjustable attendance target** — drag a global slider (default 80%) to recalculate everything on the fly.
-- ⚡ **Dynamic Branch Timetable** — keeps track of today's hitlist automatically based on branch inputs (ISE/CSE/ECE/AIML).
-- 📅 **Exact Calendar Forecasts** — tells you exactly how many remaining classes are schedule-aware with holiday calendar indexing.
-- 🚨 **Conditional layout warnings** — renders conditional "You're Cooked" states for unattainable projection levels natively.
-- 💀 **Catch-up calculator** — tells you exactly how many consecutive classes you must attend to hit your target.
-- ✅ **Safe-to-bunk counter** — tells you how many classes you can miss while staying above target.
-- 🌙 **Dark, premium widget UI** — built with Tailwind CSS, static iOS layout wrappers, Framer Motion transitions, and Lucide icons.
+- 💀 **Catch-up & Bunk calculators** — tells you exactly how many consecutive classes you must attend or can safely miss.
 
 ---
 
