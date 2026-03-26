@@ -637,8 +637,6 @@ export default function DashboardPage() {
         </motion.div>
       )}
 
-      
-
       <div className="bg-[#111111] border border-white/5 rounded-[2rem] p-6 mb-8 shadow-2xl relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 rounded-full blur-[80px] pointer-events-none" />
 
@@ -868,6 +866,101 @@ export default function DashboardPage() {
             </motion.div>
           ))}
         </div>
+      </div>
+
+      {/* New Features Grid */}
+      <div className="mb-10 grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        {/* Extracurricular Activities */}
+        <div className="bg-[#111111] border border-white/5 rounded-[2rem] p-6 shadow-xl relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-[80px] pointer-events-none" />
+          <h2 className="text-xl font-bold text-white mb-4 flex items-center gap-2 relative z-10">🎯 Activities & Clubs</h2>
+          <div className="space-y-4 relative z-10">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center text-xl">💻</div>
+                <div>
+                  <h4 className="text-sm font-bold text-blue-400">Coding Club</h4>
+                  <p className="text-xs text-neutral-400">Active Member</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-blue-400">Next meeting: Wed</span>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-purple-500/10 border border-purple-500/20">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center text-xl">🎤</div>
+                <div>
+                  <h4 className="text-sm font-bold text-purple-400">Debate Society</h4>
+                  <p className="text-xs text-neutral-400">Core Committee</p>
+                </div>
+              </div>
+              <span className="text-xs font-bold text-purple-400">Event on 15th</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Subject Marks and Next Internal Predictor */}
+        <div className="bg-[#111111] border border-white/5 rounded-[2rem] p-6 shadow-xl lg:col-span-2 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-[80px] pointer-events-none" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 relative z-10">
+            <h2 className="text-xl font-bold text-white flex items-center gap-2">📊 Internal Marks Predictor</h2>
+            <span className="text-[10px] font-bold text-[#D9A02A] bg-[#D9A02A]/10 px-3 py-1.5 rounded-lg border border-[#D9A02A]/20 uppercase tracking-widest">
+              TARGET: 80% OVERALL (40/50)
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 relative z-10">
+            {[
+              { subject: "M1", score: 45, total: 50, grade: "O" },
+              { subject: "PHY", score: 38, total: 50, grade: "A" },
+              { subject: "CP", score: 48, total: 50, grade: "O" },
+              { subject: "EC", score: 41, total: 50, grade: "A+" }
+            ].map((mark, idx) => {
+              const targetTotalMarks = 80; // 80 out of 100
+              const neededMarks = targetTotalMarks - mark.score;
+              const maxPossibleNext = 50;
+              const neededPercent = Math.round((neededMarks / maxPossibleNext) * 100);
+              
+              return (
+                <div key={idx} className="bg-neutral-900/50 rounded-[1.25rem] p-4 border border-white/5 relative overflow-hidden flex flex-col">
+                  <div className={`absolute left-0 top-0 w-1.5 h-full ${mark.score/mark.total >= 0.8 ? 'bg-[#D9A02A]' : 'bg-blue-500'}`} />
+                  
+                  <div className="flex justify-between items-start mb-3 pl-3">
+                    <div>
+                      <span className="text-sm text-neutral-300 font-bold block">{mark.subject}</span>
+                      <span className="text-[10px] text-neutral-500 font-mono tracking-wider">INTERNAL 1</span>
+                    </div>
+                    <div className="flex flex-col items-end">
+                      <span className="text-2xl font-black text-white">{mark.score}</span>
+                      <span className="text-[10px] text-neutral-500 font-mono">/ {mark.total}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-black/40 rounded-xl p-3 border border-white/5 pl-3 mt-auto">
+                    <span className="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-2 block">
+                      Next Internal Need
+                    </span>
+                    {neededMarks > maxPossibleNext ? (
+                       <p className="text-xs text-[#FF453A] font-semibold">Need {neededMarks} (Impossible!)</p>
+                    ) : neededMarks <= 0 ? (
+                       <p className="text-xs text-emerald-400 font-bold">Goal secured 🎉</p>
+                    ) : (
+                       <div className="flex justify-between items-center">
+                         <span className="text-sm font-bold text-white">
+                           {Math.max(0, neededMarks)} 
+                           <span className="text-xs font-normal text-neutral-500 ml-1">/ {maxPossibleNext}</span>
+                         </span>
+                         <span className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${neededPercent > 80 ? 'bg-[#FF453A]/10 text-[#FF453A]' : 'bg-blue-500/10 text-blue-400'}`}>
+                           {neededPercent}%
+                         </span>
+                       </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
       </div>
 
     </motion.div>
