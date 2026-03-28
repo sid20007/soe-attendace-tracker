@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, SlidersHorizontal, Info, X, Calendar, Clock, GraduationCap } from "lucide-react";
+import { LogOut, SlidersHorizontal, Info, X, Calendar, Clock, GraduationCap, FileText, User, Search, Download } from "lucide-react";
 import { motion } from "framer-motion";
 
 const masterTimetable = {
@@ -587,13 +587,25 @@ export default function DashboardPage() {
           <div className="flex flex-col min-w-0">
             <div className="flex flex-row flex-wrap items-center gap-x-1 sm:gap-2">
               <span className="text-xl sm:text-3xl font-bold text-white tracking-tight">Welcome,</span>
-              <span className="text-xl sm:text-3xl font-bold text-white tracking-tight truncate">
+              <span className="text-xl sm:text-3xl font-bold text-[#D9A02A] tracking-tight truncate">
                 {loginId || "Student"}
               </span>
             </div>
-            <p className="text-neutral-400 font-medium tracking-wide text-[11px] sm:text-sm mt-0.5 sm:mt-1 truncate">
-              {activeBranch !== "UNKNOWN" ? activeBranch : "Student"} • {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
-            </p>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+              <p className="text-neutral-400 font-medium tracking-wide text-[11px] sm:text-sm flex items-center gap-1.5">
+                <GraduationCap className="w-3.5 h-3.5 text-blue-400" />
+                {activeBranch !== "UNKNOWN" ? activeBranch : "Student"}
+              </p>
+              <span className="w-1 h-1 rounded-full bg-neutral-700 hidden sm:block" />
+              <p className="text-neutral-400 font-medium tracking-wide text-[11px] sm:text-sm flex items-center gap-1.5">
+                <User className="w-3.5 h-3.5 text-emerald-400" />
+                Semester {selectedSemester}
+              </p>
+              <span className="w-1 h-1 rounded-full bg-neutral-700 hidden sm:block" />
+              <p className="text-neutral-500 font-medium text-[11px] sm:text-sm">
+                {time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+              </p>
+            </div>
           </div>
         </div>
         <button
@@ -961,6 +973,60 @@ export default function DashboardPage() {
           </div>
         </div>
 
+      </div>
+
+      {/* Question Paper Vault */}
+      <div className="mb-10">
+        <div className="bg-[#111111] border border-white/5 rounded-[2rem] p-6 shadow-2xl relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/5 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 relative z-10">
+            <div>
+              <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                <FileText className="w-7 h-7 text-blue-500" />
+                Question Paper Vault
+              </h2>
+              <p className="text-neutral-500 text-sm mt-1">Access previous year question papers for all subjects</p>
+            </div>
+            
+            <div className="relative group max-w-xs w-full">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-neutral-500 group-focus-within:text-blue-500 transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Search subject or code..." 
+                className="w-full bg-neutral-900 border border-white/5 rounded-xl py-2.5 pl-10 pr-4 text-sm text-white focus:outline-none focus:border-blue-500/50 transition-all focus:ring-1 focus:ring-blue-500/20"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 relative z-10">
+            {subjects.map((sub, idx) => (
+              <div key={`vault-${sub.code}`} className="group bg-neutral-900/50 hover:bg-neutral-800/50 border border-white/5 rounded-2xl p-4 transition-all hover:scale-[1.02] cursor-pointer">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="bg-blue-500/10 p-2 rounded-xl text-blue-400">
+                    <FileText className="w-5 h-5" />
+                  </div>
+                  <Download className="w-4 h-4 text-neutral-600 group-hover:text-blue-500 transition-colors" />
+                </div>
+                <h4 className="text-white font-bold text-sm line-clamp-1">{sub.name}</h4>
+                <p className="text-neutral-500 text-[11px] font-mono mt-0.5">{sub.code}</p>
+                
+                <div className="mt-4 flex flex-wrap gap-1.5">
+                  <span className="text-[10px] font-bold bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md border border-white/5">2023</span>
+                  <span className="text-[10px] font-bold bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md border border-white/5">2022</span>
+                  <span className="text-[10px] font-bold bg-neutral-800 text-neutral-400 px-2 py-0.5 rounded-md border border-white/5">MID-SEM</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-8 flex justify-center relative z-10">
+            <button className="text-sm font-bold text-neutral-400 hover:text-white flex items-center gap-2 px-6 py-2 rounded-full border border-white/5 hover:bg-white/5 transition-all">
+              Browse More Resources
+              <Info className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
 
     </motion.div>
