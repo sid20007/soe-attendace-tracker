@@ -1,56 +1,70 @@
 # B.Tech Connect — Attendance Tracker
 
-A sleek, privacy-first attendance tracker for students of St. Aloysius College (SOE). Log in with your student portal credentials and instantly see your subject-wise attendance, how many classes you can bunk, or how many you need to catch up — all calculated in real time.
+A privacy-focused attendance tracker built for students of St. Aloysius College (SOE). After logging in with your student portal credentials, you can instantly check your subject-wise attendance, see how many classes you can afford to miss, or figure out how many you need to make up — updated in real time.
 
-> **Your password is never stored.** Credentials are used only to authenticate with the university portal and are discarded after the data is fetched.
+> **Your password is never stored.** It is used only to authenticate with the university portal and is discarded immediately after your attendance data is fetched.
 
 ---
 
 ## Features
 
-- **Secure login** — authenticates against the live `btechconnect` portal using CSRF-safe session handling router echoes.
-- **Subject-wise attendance cards** — shows attended / total classes and current percentage with accurate dynamic width bar gauges.
-- **Adjustable attendance target** — drag a global slider (default 80%) to recalculate everything on the fly.
-- **Dynamic Branch Timetable** — keeps track of today's hitlist automatically based on branch inputs (ISE/CSE/ECE/AIML).
-- **Exact Calendar Forecasts** — tells you exactly how many remaining classes are schedule-aware with holiday calendar indexing.
-- **Conditional layout warnings** — renders conditional "You're Cooked" states for unattainable projection levels natively.
-- **Catch-up calculator** — tells you exactly how many consecutive classes you must attend to hit your target.
-- **Safe-to-bunk counter** — tells you how many classes you can miss while staying above target.
-- **Dark, premium widget UI** — built with Tailwind CSS, Framer Motion, and Lucide icons.
+- **Secure login** — authenticates directly against the live `btechconnect` portal with CSRF-safe session handling.
+- **Subject-wise attendance cards** — displays attended vs. total classes and current percentage, with a dynamic progress bar for each subject.
+- **Adjustable attendance target** — set your own target percentage (default 80%) using a global slider; all calculations update instantly.
+- **Branch-aware timetable** — automatically loads today's class schedule based on your branch (ISE / CSE / ECE / AIML).
+- **Calendar-aware forecasts** — remaining class counts account for holidays, giving you accurate projections.
+- **Attendance warnings** — flags subjects where hitting your target is no longer realistic.
+- **Catch-up calculator** — shows exactly how many consecutive classes you need to attend to get back on track.
+- **Safe-to-bunk counter** — tells you how many classes you can skip without dropping below your target.
+- **Clean dark UI** — built with Tailwind CSS, Framer Motion, and Lucide icons.
+
+---
 
 ## Tech Stack
 
-- **Framework:** Next.js 14 (App Router)
-- **Styling:** Tailwind CSS
-- **Animations:** Framer Motion
-- **Icons:** Lucide React
-- **HTTP (server):** Axios + axios-cookiejar-support + tough-cookie
-- **Runtime:** Node.js (via Next.js API Routes)
+| Layer | Technology |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Styling | Tailwind CSS |
+| Animations | Framer Motion |
+| Icons | Lucide React |
+| HTTP client | Axios + axios-cookiejar-support + tough-cookie |
+| Runtime | Node.js via Next.js API Routes |
 
-## Getting Started — Prerequisites
+---
+
+## Getting Started
+
+### Prerequisites
 
 - Node.js 18+
-- npm / yarn / pnpm
+- npm, yarn, or pnpm
 
-### Install & Run
+### Installation
 
 ```bash
-# 1. Navigate to the dashboard directory
-cd "dashboard"
+# Navigate to the dashboard directory
+cd dashboard
 
-# 2. Install dependencies
+# Install dependencies
 npm install
 
-# 3. Start the development server
+# Start the development server
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
 
 ---
 
 ## How It Works
 
-1. **Login page** (`/`) — Enter your register number, portal password, and semester. The app never persists your password.
-2. **API route** (`/api/attendance`) — A server-side Next.js route visits the college portal, handles CSRF tokens and session cookies, and fetches attendance JSON, echoing credentials back for identity verification.
-3. **Dashboard** (`/dashboard`) — Reads the fetched data from `localStorage` and renders animated layout widget cards utilizing exact branch timetable data for projections.
+1. **Login** (`/`) — Enter your register number, portal password, and semester. Your password is never saved anywhere.
+2. **Attendance fetch** (`/api/attendance`) — A server-side route logs into the college portal, handles CSRF tokens and session cookies, retrieves your attendance data, and discards your credentials.
+3. **Dashboard** (`/dashboard`) — Pulls the fetched data from `localStorage` and renders per-subject cards with attendance stats, bunk calculations, and catch-up projections based on your branch timetable.
+
+---
+
+## License
+
+MIT
